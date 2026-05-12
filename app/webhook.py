@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 
 from app.conversation import store
 from app.claude_client import send_message
+from app import whatsapp
 from app.whatsapp import parse_incoming
 
 load_dotenv()
@@ -47,7 +48,6 @@ async def receive_message(request: Request):
     print(f"\n[{phone}] User: {text}")
     print(f"[{phone}] Claude: {reply}\n")
 
-    # TODO: uncomment when Meta credentials are available
-    # await whatsapp.send_message(phone, reply)
+    await whatsapp.send_message(phone, reply)
 
     return {"status": "ok"}

@@ -25,15 +25,10 @@ def parse_incoming(payload: dict) -> tuple[str, str] | None:
     except (KeyError, IndexError):
         return None
 
-
 async def send_message(phone: str, text: str) -> None:
-    """Send a text message back to a WhatsApp number via Cloud API.
-
-    Not yet wired up — requires real Meta credentials in .env.
-    """
     token = os.getenv("WHATSAPP_TOKEN")
-    phone_id = os.getenv("WHATSAPP_PHONE_ID")
-    url = f"https://graph.facebook.com/v19.0/{phone_id}/messages"
+    phone_id = os.getenv("WHATSAPP_PHONE_NUMBER_ID")
+    url = f"https://graph.facebook.com/v20.0/{phone_id}/messages"
     payload = {
         "messaging_product": "whatsapp",
         "to": phone,
@@ -41,8 +36,12 @@ async def send_message(phone: str, text: str) -> None:
         "text": {"body": text},
     }
     async with httpx.AsyncClient() as client:
-        await client.post(
+        response = await client.post(
             url,
             json=payload,
             headers={"Authorization": f"Bearer {token}"},
         )
+        if response.status_code != 200:
+            print(f"[ERROR Meta API] {response.status_code}: {response.text}")
+        else:
+            print(f"[OK] Mensaje enviado a {phone}")
